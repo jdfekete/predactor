@@ -1,0 +1,95 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  </head>
+  <body>
+  <div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.0.0/polyfill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/scion/5.0.4/scxml.min.js"></script>
+
+    <input type="range" id="slider" name="slider"
+           min="0" max="11">
+    <label for="Slider">Slider</label>
+
+    <script>
+      const listeners = {
+          onEntry: function(stateId) { console.log('entering state ' + stateId); },
+          onExit: function(stateId) { console.log('exiting state ' + stateId); },
+          onTransition: function(sourceStateId, targetIds) {
+              if (targetIds && targetIds.length) {
+                  console.log('transitioning from ' + sourceStateId + ' to ' + targetIds.join(','));
+              } else {
+                  console.log('executing target-less transition in ' + sourceStateId);
+              }
+          },
+          onError: function(err) {
+              console.log('ERROR:' + JSON.stringify(err));
+          }
+      };
+      
+      function dataModelToSlider(dm, slider) {
+          slider.min = dm.min;
+          slider.max = dm.max;
+          slider.valueAsNumber = dm.value;
+      }
+
+      function sliderToDataModel(slider) {
+          return {
+              min: slider.min,
+              max: slider.max,
+              value: slider.valueAsNumber,
+              //step: slider.step,
+              exists_prev: false,
+              exists_next: false
+          };
+      }
+
+      function main() {
+          window.scion.scxml.urlToModel('slider.scxml',
+                                        function(err,modelFactoryFactory){
+              if(err) throw err;
+              
+              modelFactoryFactory.prepare(function(err,modelFactory){
+                  var value = slider.valueAsNumber;
+                  const sc = new window.scion.core.Statechart(modelFactory, {
+                      params: sliderToDataModel(slider)
+                  });
+                  sc.registerListener(listeners);
+                  
+                  // add event handler
+                  slider.addEventListener('input', function(){
+                      if (slider.valueAsNumber > value) {
+                          value = slider.valueAsNumber;
+                          sc.gen('progress', value);
+                      }
+                      else if (slider.valueAsNumber < value) {
+                          value = slider.valueAsNumber;
+                          sc.gen('regress', value);
+                      }
+                  });
+
+                  slider.addEventListener('focus', function() {
+                      sc.gen('focus');
+                      console.log(sc.getConfiguration());
+                  });
+
+                  slider.addEventListener('blur', function() {
+                      sc.gen('defocus');
+                      console.log(sc.getConfiguration());
+                      console.log(sc.getSnapshot());
+                  });
+                  
+                  //now that our listeners have been registered, we start the machine
+                  sc.start();
+                  console.log(sc.getSnapshot());
+                  console.log(sc.getConfiguration());
+                  sc.gen('organize');
+                  sc.gen('present');
+              })
+          });
+      }
+      main();
+    </script>
+  </div>
+  </body>
+</html>

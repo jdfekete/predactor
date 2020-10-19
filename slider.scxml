@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml  
+    datamodel="ecmascript"
+    initial="initialized"
+    name="AIINContinuous"
+    version="1.0"
+    xmlns="http://www.w3.org/2005/07/scxml">
+  <datamodel>
+    <data id="value" expr="0"/>
+    <data id="min" expr="0"/>
+    <data id="max" expr="0"/>
+    <data id="step" expr="1"/>
+    <data id="exists_prev" expr="false"/>
+    <data id="exists_next" expr="false"/>
+  </datamodel>
+    
+ <state id="initialized">
+  <transition event="organize" target="organized"/>
+ </state>
+ <state id="organized">
+  <transition event="present" target="presenting"/>
+  <transition event="suspend" target="suspended"/>
+ </state>
+ <state id="suspended">
+  <transition event="organize" target="organized"/>
+  <transition event="present" target="presenting"/>
+ </state>
+  <state id="presenting" initial="defocused">
+  <onentry>
+   <script>
+   console.log('entering');
+   </script>
+  </onentry>
+  <transition event="suspend" target="suspended"></transition>
+  <state id="focused" initial="waiting">
+   <transition cond="exists_prev" event="prev" target="defocused">
+    <send target="focus_previous" type="x-mint"></send>
+   </transition>
+   <transition cond="exists_next" event="next" target="defocused">
+    <send target="focus_next" type="x-mint"></send>
+   </transition>
+   <transition event="defocus" target="defocused"/>
+   <transition event="parent" target="defocused">
+    <send target="focus_parent" type="x-mint"/>
+   </transition>
+   <state id="moving">
+    <transition event="halt" target="waiting"/>
+    <state id="progressing">
+      <onentry>
+        <assign location="value" expr="_event.data"/>
+      </onentry>
+     <transition cond="value>=max" target="max"/>
+     <transition event="regress" target="regressing"/>
+     <transition event="progress" target="progressing"/>
+    </state>
+    <state id="regressing">
+      <onentry>
+        <assign location="value" expr="_event.data"/>
+      </onentry>
+      <transition event="progress" target="progressing"/>
+      <transition event="regress" target="regressing"/>
+      <transition cond="value<=min" target="min"/>
+    </state>
+    <state id="max">
+      <transition event="regress" target="regressing"/>
+    </state>
+    <state id="min">
+      <transition event="progress" target="progressing"/>
+    </state>
+   </state>
+   <state id="waiting">
+     <transition event="progress" target="progressing"/>
+     <transition event="regress" target="regressing"/>
+   </state>
+  </state>
+  <state id="defocused">
+   <transition event="focus" target="focused"/>
+  </state>
+ </state>
+</scxml>
