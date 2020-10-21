@@ -2,8 +2,9 @@
 <scxml  
     datamodel="ecmascript"
     initial="initialized"
-    name="AIINContinuous"
+    name="slider"
     version="1.0"
+    xmlns:dbvis="dbvis"
     xmlns="http://www.w3.org/2005/07/scxml">
   <datamodel>
     <data id="value" expr="0"/>
@@ -31,16 +32,16 @@
    console.log('entering');
    </script>
   </onentry>
-  <transition event="suspend" target="suspended"></transition>
+  <transition event="suspend" target="suspended"/>
   <state id="focused" initial="waiting">
    <transition cond="exists_prev" event="prev" target="defocused">
-    <send target="focus_previous" type="x-mint"></send>
+    <send target="focus_previous" type="x-mint"/>
    </transition>
    <transition cond="exists_next" event="next" target="defocused">
-    <send target="focus_next" type="x-mint"></send>
+    <send target="focus_next" type="x-mint"/>
    </transition>
-   <transition event="defocus" target="defocused"/>
-   <transition event="parent" target="defocused">
+   <transition event="defocus" target="defocused" dbvis:latency="1"/>
+   <transition event="parent" target="defocused" dbvis:latency="1">
     <send target="focus_parent" type="x-mint"/>
    </transition>
    <state id="moving">
@@ -50,31 +51,31 @@
         <assign location="value" expr="_event.data"/>
       </onentry>
      <transition cond="value>=max" target="max"/>
-     <transition event="regress" target="regressing"/>
-     <transition event="progress" target="progressing"/>
+     <transition event="regress" target="regressing" dbvis:latency="0.1"/>
+     <transition event="progress" target="progressing" dbvis:latency="0.1"/>
     </state>
     <state id="regressing">
       <onentry>
         <assign location="value" expr="_event.data"/>
       </onentry>
-      <transition event="progress" target="progressing"/>
-      <transition event="regress" target="regressing"/>
+      <transition event="progress" target="progressing" dbvis:latency="0.1"/>
+      <transition event="regress" target="regressing" dbvis:latency="0.1"/>
       <transition cond="value<=min" target="min"/>
     </state>
     <state id="max">
-      <transition event="regress" target="regressing"/>
+      <transition event="regress" target="regressing" dbvis:latency="0.1"/>
     </state>
     <state id="min">
-      <transition event="progress" target="progressing"/>
+      <transition event="progress" target="progressing" dbvis:latency="0.1"/>
     </state>
    </state>
    <state id="waiting">
-     <transition event="progress" target="progressing"/>
-     <transition event="regress" target="regressing"/>
+     <transition event="progress" target="progressing" dbvis:latency="0.1"/>
+     <transition event="regress" target="regressing" dbvis:latency="0.1"/>
    </state>
   </state>
   <state id="defocused">
-   <transition event="focus" target="focused"/>
+   <transition event="focus" target="focused" dbvis:latency="1"/>
   </state>
  </state>
 </scxml>

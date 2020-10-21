@@ -45,6 +45,8 @@
       }
 
       function main() {
+          // To dump the scJson code on the console, uncomment the following line:
+          // window.scion.scxml.ext.platform.debug=true;
           window.scion.scxml.urlToModel('slider.scxml',
                                         function(err,modelFactoryFactory){
               if(err) throw err;
