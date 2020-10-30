@@ -14,8 +14,8 @@
 </head>
 
 <body>
-<div id="range-slider">
-</div>
+	<div id="range-slider">
+	</div>
 	<label for="range-slider">Range-Slider</label>
 	<p>
 		Implementation of a range slider by noUiSlider. It can be found <a href="https://refreshless.com/nouislider/">here</a>. <br>
@@ -28,7 +28,6 @@
 		The limitations, in the interaction, caused by having one handle, or both, at the min/max will be just addressed as low-level checks.
 	</p>
 	<img src="range-slider-stn.jpg" alt="The slider's model." style="width:900px;height:400px;">
-</div>
 </body>
 
 <!the script to visualize the noUiSlider>
@@ -45,55 +44,53 @@
 		}
 	});
 </script>
+<script>
+	const listeners = {
+		onEntry: function(stateId) { console.log('entering state ' + stateId); },
+		onExit: function(stateId) { console.log('exiting state ' + stateId); },
+		onTransition: function(sourceStateId, targetIds) {
+			if (targetIds && targetIds.length) {
+				console.log('transitioning from ' + sourceStateId + ' to ' + targetIds.join(','));
+				} else {
+				console.log('executing target-less transition in ' + sourceStateId);
+				}		
+			},
+		onError: function(err) {
+			console.log('ERROR:' + JSON.stringify(err));
+		}
+	};
+	function dataModelToSlider(dm, slider) {
+		slider.min = dm.min;	
+		slider.max = dm.max;	
+		slider.noUiSlider.set([dm.value1, dm.value2]);
+	}
+	function sliderToDataModel(slider) {
+		return {
+			min: 0, 	//hard-coded, bad practice!!!
+			max: 21,	//hard-coded, bad practice!!!
+			value1: parseInt(slider.noUiSlider.get()[0]),
+			value2: parseInt(slider.noUiSlider.get()[1])
+		};
+	}
 
-
-		<script>
-			const listeners = {
-				onEntry: function(stateId) { console.log('entering state ' + stateId); },
-				onExit: function(stateId) { console.log('exiting state ' + stateId); },
-				onTransition: function(sourceStateId, targetIds) {
-					if (targetIds && targetIds.length) {
-						console.log('transitioning from ' + sourceStateId + ' to ' + targetIds.join(','));
-						} else {
-						console.log('executing target-less transition in ' + sourceStateId);
-						}		
-					},
-				onError: function(err) {
-					console.log('ERROR:' + JSON.stringify(err));
-				}
-			};
-			function dataModelToSlider(dm, slider) {
-				  slider.min = dm.min;	
-				  slider.max = dm.max;	
-				  slider.set([dm.value1, dm.value2]);
-			}
-			function sliderToDataModel(slider) {
-				return {
-					min: 0, 	//hard-coded, bad practice!!!
-					max: 21,	//hard-coded, bad practice!!!
-					value1: slider.get()[0],
-					value2: slider.get()[1]
-				};
-			}
-
-			function main() {
-				window.scion.scxml.urlToModel('range-slider.scxml',						
-					function(err,modelFactoryFactory){
-						if(err) throw err;
+	function main() {
+		window.scion.scxml.urlToModel('range-slider.scxml',						
+			function(err,modelFactoryFactory){
+				if(err) throw err;
 					  
-						modelFactoryFactory.prepare(function(err,modelFactory){
-							const sc = new window.scion.core.Statechart(modelFactory, {
-								params: sliderToDataModel(slider)
-							});
-							
-							sc.registerListener(listeners);
-							//now that our listeners have been registered, we start the machine
-							sc.start();
-							console.log(sc.getSnapshot());
-							console.log(sc.getConfiguration());
-						})
+				modelFactoryFactory.prepare(function(err,modelFactory){
+					const sc = new window.scion.core.Statechart(modelFactory, {
+						params: sliderToDataModel(slider)
 					});
-			}
-			main();
-		</script>
+							
+					sc.registerListener(listeners);
+					//now that our listeners have been registered, we start the machine
+					sc.start();
+					console.log(sc.getSnapshot());
+					console.log(sc.getConfiguration());
+				})
+			});
+	}
+	main();
+</script>
 </html>
