@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<html>
+
+<link href="nouislider.css" rel="stylesheet">
+<link rel="stylesheet" href="range-slider-style.css">
+
+<script src="nouislider.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.0.0/polyfill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/scion/5.0.4/scxml.min.js"></script>
+
+	
+<head>
+</head>
+
+<body>
+<div id="range-slider">
+</div>
+	<label for="range-slider">Range-Slider</label>
+	<p>
+		Implementation of a range slider by noUiSlider. It can be found <a href="https://refreshless.com/nouislider/">here</a>. <br>
+		The chosen behaviour is "unconstrained-drag-tap-hover-snap", meaning that we are allowing users to interact with the slider in these ways: <br>
+		1)Dragging the range left or right. <br>
+		2)Dragging one of the handles left or right. Notice that handles can pass through each other, but can't go past MAX or MIN. <br>
+		3)Tapping directly on the bar, making the nearest handle move to that spot. <br>
+		4)After having clicked one of the handles, it can be moved with left and right keys of the keyboard. <br><br>
+		In this first implementation, I am considering just this states: REST, HOVERING-HANDLE(id), HOVERING-BAR, HOVERING-SELECTION, MOVING(id), DRAGGING. <br>
+		The limitations, in the interaction, caused by having one handle, or both, at the min/max will be just addressed as low-level checks.
+	</p>
+	<img src="range-slider-stn.jpg" alt="The slider's model." style="width:900px;height:400px;">
+</div>
+</body>
+
+<!the script to visualize the noUiSlider>
+<script>
+	var slider = document.getElementById('range-slider');
+
+	noUiSlider.create(slider, {
+		start: [5, 15],
+		behaviour: 'unconstrained-drag-tap-hover-snap',
+		connect: true,
+		range: {
+			'min': 0,
+			'max': 21
+		}
+	});
+</script>
+
+
+		<script>
+			const listeners = {
+				onEntry: function(stateId) { console.log('entering state ' + stateId); },
+				onExit: function(stateId) { console.log('exiting state ' + stateId); },
+				onTransition: function(sourceStateId, targetIds) {
+					if (targetIds && targetIds.length) {
+						console.log('transitioning from ' + sourceStateId + ' to ' + targetIds.join(','));
+						} else {
+						console.log('executing target-less transition in ' + sourceStateId);
+						}		
+					},
+				onError: function(err) {
+					console.log('ERROR:' + JSON.stringify(err));
+				}
+			};
+			function dataModelToSlider(dm, slider) {
+				  slider.min = dm.min;	
+				  slider.max = dm.max;	
+				  slider.set([dm.value1, dm.value2]);
+			}
+			function sliderToDataModel(slider) {
+				return {
+					min: 0, 	//hard-coded, bad practice!!!
+					max: 21,	//hard-coded, bad practice!!!
+					value1: slider.get()[0],
+					value2: slider.get()[1]
+				};
+			}
+
+			function main() {
+				window.scion.scxml.urlToModel('range-slider.scxml',						
+					function(err,modelFactoryFactory){
+						if(err) throw err;
+					  
+						modelFactoryFactory.prepare(function(err,modelFactory){
+							const sc = new window.scion.core.Statechart(modelFactory, {
+								params: sliderToDataModel(slider)
+							});
+							
+							sc.registerListener(listeners);
+							//now that our listeners have been registered, we start the machine
+							sc.start();
+							console.log(sc.getSnapshot());
+							console.log(sc.getConfiguration());
+						})
+					});
+			}
+			main();
+		</script>
+</html>

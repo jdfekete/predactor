@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml  
+    datamodel="ecmascript"
+    initial="rest"
+    name="ranger-slider"
+    version="1.0"
+    xmlns="http://www.w3.org/2005/07/scxml">
+	
+	<datamodel>
+		<data id="value1" expr="0"/>
+		<data id="value2" expre="0"/>
+		<data id="min" expr="0"/>
+		<data id="max" expr="0"/>
+		<data id="handle-id" expr="0"/>
+	</datamodel>
+  
+	<state id="rest">
+		<transition event='hoverB' target='hovering-bar'/>
+		<transition event='hoverH' target='hovering-handle'/>
+		<transition event='hoverS' target='hovering-selection'/>
+	</state>
+	<state id="hovering-handle">
+		<transition event='hoverA' target='rest'/>
+		<transition event='click' target='waiting'/>
+		<transition event='hoverB' target='hovering-bar'/>
+		<transition event='hoverS' target='hovering-selection'/>
+	</state>
+	<state id="hovering-selection">
+		<transition event='hoverA' target='rest'/>
+		<transition event='drag' target='dragging'/>
+		<transition event='hoverB' target='hovering-bar'/>
+		<transition event='hoverH' target='hovering-handle'/>
+	</state>
+	<state id="hovering-bar">
+		<transition event='hover' target='rest'/>
+		<transition event='' target='moving'/>
+		<transition event='' target='hovering-handle'/>
+		<transition event='' target='hovering-selection'/>
+	</state>
+	<state id="waiting">
+		<transition event='' target='hovering-handle'/>
+		<transition event='' target='moving'/>
+	</state>
+	<state id="moving">
+		<transition event='' target='rest'/>
+		<transition event='' target='hovering-handle'/>
+	</state>
+	<state id="dragging">
+		<transition event='' target='rest'/>
+		<transition event='' target='hovering-handle'/>
+		<transition event='' target='hovering-selection'/>
+	</state>
+</scxml>
