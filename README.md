@@ -1,5 +1,5 @@
 # predactor
-Interactors for prediction
+Predictive Interactors
 
 # Test
 
